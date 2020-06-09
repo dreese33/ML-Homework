@@ -259,19 +259,46 @@ def random_fourier_features(train_X, train_Y, num_fourier_features=100, alpha=0.
 	# You will find the following functions useful for sampling:
 	# 	numpy.random.multivariate_normal() for normal random variables
 	#	numpy.random.random() for Uniform random variables
+
+	""" Original Code
 	Omega = None 	# TODO: sample inner-products
 	B = None		# TODO: sample translations
-	Phi = apply_RFF_transform(train_X,Omega,B)
+	Phi = apply_RFF_transform(train_X, Omega, B)"""
+
+	# Old code from other semester:
+	identity_matrix = numpy.eye(num_fourier_features)
+	mean = numpy.zeros(num_fourier_features)
+	Omega = numpy.random.multivariate_normal(mean, identity_matrix, train_X.shape[1])
+
+	B = (numpy.random.random((num_fourier_features,)) - 0.5) * 0.2
+
+	Phi = apply_RFF_transform(train_X, Omega, B)
+
+
 	# here's an example of using numpy.random.random()
 	# to generate a vector of length = (num_fourier_features), between -0.1 and 0.1
 	initial_Theta = (numpy.random.random(size=(num_fourier_features + 1, 1)) - 0.5) * 0.2
 	step_history = linreg_grad_desc(initial_Theta, Phi, train_Y, alpha=alpha, num_iters=num_iters, print_iters=print_iters)
+
+
+	print("Step History: ")
+	print(step_history[-1][0])
+
 	return step_history[-1][0], Omega, B
 
 
 def rff_model_sample(Theta, Omega, B, model_X):
 	sampled_X = numpy.linspace(model_X.min(axis=0), model_X.max(axis=0), 100)
 	Phi = apply_RFF_transform(sampled_X, Omega, B)
+
+	print("Phi")
+	print(Phi)
+	print(Phi.shape)
+	print("Theta")
+	print(Theta)
+	print(Theta.shape)
+
+	Phi = numpy.hstack([numpy.array([numpy.ones(Phi.shape[0])]).T, Phi])
 	sampled_Y = Phi.dot(Theta)
 	return sampled_X, sampled_Y
 
@@ -339,9 +366,17 @@ def test_gradient_descent(index):
 	print(numpy.linalg.lstsq(data_X, data_Y, rcond=-1))
 
 
+def test_rff(index):
+	data_X, data_Y = load_data(files_array[index])
+	Theta, Omega, B = random_fourier_features(data_X, data_Y)
+	vis_rff_model(data_X, data_Y, Theta, Omega, B)
+
+
 if __name__ == '__main__':
-	data_X, data_Y = load_data(files_array[2])
+	#data_X, data_Y = load_data(files_array[2])
 	#test_all_linreg()
 	#test_loss_function(0)
-	test_gradient_descent(5)
+	#test_gradient_descent(5)
+	test_rff(5)
+
 
