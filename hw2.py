@@ -98,12 +98,14 @@ def load_data(fname, directory='data'):
 
 
 def vis_linreg_model(train_X, train_Y, Theta):
-	sample_X, sample_Y = linreg_model_sample(Theta, train_X)
-
-	# NOTE: this won't work directly with 3D data. Write your own function, or modify this one
-	# to generate plots for 2D-noisy-lin.txt or other 3D data.
-
-	plot_helper(train_X, train_Y, sample_X, sample_Y) 
+	if Theta.shape[0] == 2:
+		sample_X, sample_Y = linreg_model_sample(Theta,train_X)
+		#NOTE: this won't work directly with 3D data. Write your own function, or modify this one
+        #to generate plots for 2D-noisy-lin.txt or other 3D data.
+		plot_helper(train_X, train_Y, sample_X, sample_Y)
+	else:
+		sample_X, sample_Y, sample_Z = linreg_model_sample(Theta, train_X)
+		plot_helper(data_X=train_X, data_Y=train_Y, model_X=sample_X, model_Y=sample_Y, model_Z=sample_Z)
 
 ###################
 # YOUR CODE BELOW #
@@ -151,6 +153,12 @@ def loss(Theta, train_X, train_Y):
 	for i in range(n):
 
 		# This line is questionable...
+		#print("Train X")
+		#print(train_X)
+		#print("Theta")
+		#print(Theta)
+		#print("Train Y")
+		#print(train_Y)
 		val = (train_X[i].dot(Theta) - train_Y[i])
 
 		val_transpose = numpy.transpose(val)
@@ -182,17 +190,25 @@ def linreg_grad_desc(initial_Theta, train_X, train_Y, alpha=0.05, num_iters=500,
 		The history of theta's and their associated loss as a list of tuples [ (Theta1,loss1), (Theta2,loss2), ...]
 	'''
 
+	train_X = numpy.hstack([numpy.zeros((train_X.shape[0], 1)), train_X])
 	cur_Theta = initial_Theta
 	step_history = list()
-	for k in range(1,num_iters+1):
+	for k in range(1, num_iters + 1):
 		cur_loss = loss(cur_Theta, train_X, train_Y)
 		step_history.append((cur_Theta, cur_loss))
 		if print_iters:
 			print("Iteration: {} , Loss: {} , Theta: {}".format(k, cur_loss, cur_Theta))
-		# TODO: Add update equation here
-	return step_history
 
-def apply_RFF_transform(X,Omega,B):
+		x_transpose = numpy.transpose(train_X)
+		term1 = x_transpose.dot(train_X)
+		term2 = x_transpose.dot(train_Y)
+		term1_final = term1.dot(cur_Theta)
+		cur_Theta = cur_Theta - alpha * (1 / (train_Y.shape[0])) * (term1_final - term2)
+
+	return numpy.asarray(step_history)
+
+
+def apply_RFF_transform(X, Omega, B):
 	'''
 	Transforms features into a Fourier basis with given samples
 
@@ -265,6 +281,14 @@ def vis_rff_model(train_X, train_Y, Theta, Omega, B):
 	plot_helper(train_X, train_Y, sample_X, sample_Y)
 
 
+# Tests
+
+def test_linreg(index):
+	data_X, data_Y = load_data(files_array[index])
+	Theta = linreg_closed_form(data_X, data_Y)
+	vis_linreg_model(data_X, data_Y, Theta)
+
+
 def test_all_linreg():
 	for index in range(5):
 		data_X, data_Y = load_data(files_array[index])
@@ -272,16 +296,52 @@ def test_all_linreg():
 		vis_linreg_model(data_X, data_Y, Theta)
 
 
-def test_loss_function(file):
-	data_X, data_Y = load_data(files_array[file])
+def test_all_loss():
+	for index in range(5):
+		data_X, data_Y = load_data(files_array[index])
+		theta_closed = linreg_closed_form(data_X, data_Y)
+		data_X1 = numpy.hstack([numpy.zeros((data_X.shape[0], 1)), data_X])
+		print(loss(theta_closed, data_X1, data_Y))
+		print(numpy.linalg.lstsq(data_X, data_Y, rcond=-1))
+
+
+def test_loss_function(index):
+	data_X, data_Y = load_data(files_array[index])
 	theta_closed = linreg_closed_form(data_X, data_Y)
 	data_X1 = numpy.hstack([numpy.zeros((data_X.shape[0], 1)), data_X])
 	print(loss(theta_closed, data_X1, data_Y))
-	print(numpy.linalg.lstsq(data_X, data_Y))
+	print(numpy.linalg.lstsq(data_X, data_Y, rcond=-1))
+
+
+def test_gradient_descent(index):
+	data_X, data_Y = load_data(files_array[index])
+
+	initial_theta = [[1.], [0.]]
+	if index == 5:
+		initial_theta = [[1.], [0.], [0.]]
+
+	theta = linreg_grad_desc(initial_theta, data_X, data_Y)
+	theta = (theta[len(theta) - 1])[0]
+	print("New Theta: " + str(theta))
+
+	if index == 5:
+		vis_linreg_model(data_X, data_Y, theta)
+	else:
+		vis_linreg_model(data_X, data_Y, theta)
+
+	theta_closed = linreg_closed_form(data_X, data_Y)
+
+	print("Closed Theta: " + str(theta_closed))
+	vis_linreg_model(data_X, data_Y, theta_closed)
+
+	data_X1 = numpy.hstack([numpy.zeros((data_X.shape[0], 1)), data_X])
+	print(loss(theta_closed, data_X1, data_Y))
+	print(numpy.linalg.lstsq(data_X, data_Y, rcond=-1))
 
 
 if __name__ == '__main__':
 	data_X, data_Y = load_data(files_array[2])
 	#test_all_linreg()
 	#test_loss_function(0)
+	test_gradient_descent(5)
 
