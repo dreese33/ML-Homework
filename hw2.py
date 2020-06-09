@@ -146,7 +146,20 @@ def loss(Theta, train_X, train_Y):
 	Returns:
 		The (scalar) loss for the given parameters and data.
 	'''
-	rv = None  # TODO: compute the loss here.
+	rv = None
+	n = train_X.shape[0]
+	for i in range(n):
+
+		# This line is questionable...
+		val = (train_X[i].dot(Theta) - train_Y[i])
+
+		val_transpose = numpy.transpose(val)
+		total = val_transpose.dot(val)
+		if i == 0:
+			rv = total
+		else:
+			rv += total
+	rv /= 2 * n
 	return rv
 
 ###################
@@ -259,9 +272,16 @@ def test_all_linreg():
 		vis_linreg_model(data_X, data_Y, Theta)
 
 
-if __name__ == '__main__':
-	data_X, data_Y = load_data(files_array[3])
-	Theta = linreg_closed_form(data_X, data_Y)
+def test_loss_function(file):
+	data_X, data_Y = load_data(files_array[file])
+	theta_closed = linreg_closed_form(data_X, data_Y)
+	data_X1 = numpy.hstack([numpy.zeros((data_X.shape[0], 1)), data_X])
+	print(loss(theta_closed, data_X1, data_Y))
+	print(numpy.linalg.lstsq(data_X, data_Y))
 
-	test_all_linreg()
+
+if __name__ == '__main__':
+	data_X, data_Y = load_data(files_array[2])
+	#test_all_linreg()
+	#test_loss_function(0)
 
