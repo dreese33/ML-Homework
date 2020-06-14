@@ -122,13 +122,13 @@ def linreg_closed_form(train_X, train_Y):
 
 
 	Returns:
-		A length D+1 numpy array with the optimal parameters	
+		A length D+1 numpy array with the optimal parameters
 	'''
 	x_transpose = numpy.transpose(train_X)
 	x_transpose_dot = numpy.dot(x_transpose, train_X)
 	inverse_val = numpy.linalg.inv(x_transpose_dot)
 	Theta = numpy.dot(numpy.dot(inverse_val, x_transpose), train_Y)
-	ret_val = numpy.array(numpy.vstack([1.0, Theta]))
+	ret_val = numpy.array(numpy.vstack([0.0, Theta]))
 	return ret_val
 
 ###################
@@ -148,6 +148,7 @@ def loss(Theta, train_X, train_Y):
 	Returns:
 		The (scalar) loss for the given parameters and data.
 	'''
+	train_X = numpy.hstack([numpy.zeros((train_X.shape[0], 1)), train_X])
 	rv = None
 	n = train_X.shape[0]
 	for i in range(n):
@@ -310,6 +311,42 @@ def vis_rff_model(train_X, train_Y, Theta, Omega, B):
 
 # Tests
 
+def class_test():
+	# import data for two dimension examples, choose one for each test
+	#data_X, data_Y = load_data('1D-no-noise-lin.txt')
+	data_X, data_Y = load_data('2D-noisy-lin.txt')
+	print(data_X)
+
+
+	Theta = linreg_closed_form(data_X, data_Y)
+
+	# test by the python library function
+	theoretical_theta, theoretical_loss, _, _ = numpy.linalg.lstsq(data_X, data_Y, rcond=1)
+	theoretical_loss = theoretical_loss / (2 * data_Y.shape[0])
+	print("Theoretical", theoretical_theta)
+
+	Theta = linreg_closed_form(data_X, data_Y)
+	Loss = loss(Theta, data_X, data_Y)
+
+	print('\nClosed form theta: ', Theta.T)
+	print('Loss:', Loss)
+	vis_linreg_model(data_X, data_Y, Theta)
+
+
+def test_loss_linreg(index):
+	data_X, data_Y = load_data(files_array[index])
+
+	theoretical_theta, theoretical_loss, _, _ = numpy.linalg.lstsq(data_X, data_Y, rcond=1)
+	theoretical_loss = theoretical_loss / (2 * data_Y.shape[0])
+
+	Theta = linreg_closed_form(data_X, data_Y)
+	Loss = loss(Theta, data_X, data_Y)
+
+	print("Test: ", theoretical_theta, theoretical_loss)
+	print("Actual:", Theta, Loss)
+
+	vis_linreg_model(data_X, data_Y, Theta)
+
 def test_linreg(index):
 	data_X, data_Y = load_data(files_array[index])
 	Theta = linreg_closed_form(data_X, data_Y)
@@ -334,9 +371,9 @@ def test_all_loss():
 
 def test_loss_function(index):
 	data_X, data_Y = load_data(files_array[index])
+
 	theta_closed = linreg_closed_form(data_X, data_Y)
-	data_X1 = numpy.hstack([numpy.zeros((data_X.shape[0], 1)), data_X])
-	print(loss(theta_closed, data_X1, data_Y))
+	print(loss(theta_closed, data_X, data_Y))
 	print(numpy.linalg.lstsq(data_X, data_Y, rcond=-1))
 
 
@@ -373,10 +410,15 @@ def test_rff(index):
 
 
 if __name__ == '__main__':
-	#data_X, data_Y = load_data(files_array[2])
+	#data_X, data_Y = load_data(files_array[5])
+	#plot_helper(data_X, data_Y)
 	#test_all_linreg()
+	#test_linreg(5)
 	#test_loss_function(0)
 	#test_gradient_descent(5)
-	test_rff(5)
+	#test_rff(3)
+	#test_loss_linreg(5)
+	class_test()
+
 
 
