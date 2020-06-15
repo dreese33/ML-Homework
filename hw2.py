@@ -143,18 +143,7 @@ def loss(Theta, train_X, train_Y):
 	rv = None
 	n = train_X.shape[0]
 	for i in range(n):
-
-		# This line is questionable...
-
 		val = (train_X[i].dot(Theta) - train_Y[i])
-		"""
-		print("Train X")
-		print(train_X)
-		print("Theta")
-		print(Theta)
-		print("Train Y")
-		print(train_Y)"""
-
 		val_transpose = numpy.transpose(val)
 		total = val_transpose.dot(val)
 		if i == 0:
@@ -182,16 +171,12 @@ def linreg_grad_desc(initial_Theta, train_X, train_Y, alpha=0.05, num_iters=500,
 	'''
 
 	train_X = numpy.hstack([numpy.ones((train_X.shape[0], 1)), train_X])
-	#train_X = numpy.hstack([numpy.zeros((train_X.shape[0], 1)), train_X])
 	cur_Theta = initial_Theta
 	step_history = list()
 
 	x_transpose = numpy.transpose(train_X)
 	term1 = x_transpose.dot(train_X)
 	term2 = x_transpose.dot(train_Y)
-	#print(train_X)
-	#print("Term1", term1)
-	#print("Term2", term2)
 
 	for k in range(1, num_iters + 1):
 		cur_loss = loss(cur_Theta, train_X, train_Y)
@@ -201,7 +186,6 @@ def linreg_grad_desc(initial_Theta, train_X, train_Y, alpha=0.05, num_iters=500,
 
 		term1_final = term1.dot(cur_Theta)
 		cur_Theta = cur_Theta - alpha * (1 / (train_Y.shape[0])) * (term1_final - term2)
-		#print("Theta", cur_Theta)
 
 	return numpy.asarray(step_history)
 
@@ -241,30 +225,15 @@ def random_fourier_features(train_X, train_Y, num_fourier_features=100, alpha=0.
 		Omega (D-by-num_fourier_features numpy array): the inner product term of the transformation
 		B (numpy array of length num_fourier_features): the translation term of the transformation
 	'''
-	# You will find the following functions useful for sampling:
-	# 	numpy.random.multivariate_normal() for normal random variables
-	#	numpy.random.random() for Uniform random variables
 
-	""" Original Code
-	Omega = None 	# TODO: sample inner-products
-	B = None		# TODO: sample translations
-	Phi = apply_RFF_transform(train_X, Omega, B)"""
-
-	# Old code from other semester:
 	identity_matrix = numpy.eye(num_fourier_features)
 	mean = numpy.zeros(num_fourier_features)
 	Omega = numpy.random.multivariate_normal(mean, identity_matrix, train_X.shape[1])
-
 	B = (numpy.random.random((num_fourier_features,)) - 0.5) * 0.2
-
 	Phi = apply_RFF_transform(train_X, Omega, B)
 
-
-	# here's an example of using numpy.random.random()
-	# to generate a vector of length = (num_fourier_features), between -0.1 and 0.1
 	initial_Theta = (numpy.random.random(size=(num_fourier_features + 1, 1)) - 0.5) * 0.2
 	step_history = linreg_grad_desc(initial_Theta, Phi, train_Y, alpha=alpha, num_iters=num_iters, print_iters=print_iters)
-
 
 	print("Step History: ")
 	print(step_history[-1][0])
@@ -276,13 +245,6 @@ def rff_model_sample(Theta, Omega, B, model_X):
 	sampled_X = numpy.linspace(model_X.min(axis=0), model_X.max(axis=0), 100)
 	Phi = apply_RFF_transform(sampled_X, Omega, B)
 
-	print("Phi")
-	print(Phi)
-	print(Phi.shape)
-	print("Theta")
-	print(Theta)
-	print(Theta.shape)
-
 	Phi = numpy.hstack([numpy.array([numpy.ones(Phi.shape[0])]).T, Phi])
 	sampled_Y = Phi.dot(Theta)
 	return sampled_X, sampled_Y
@@ -293,30 +255,49 @@ def vis_rff_model(train_X, train_Y, Theta, Omega, B):
 	plot_helper(train_X, train_Y, sample_X, sample_Y)
 
 
-# Tests
+'''
+	Tests section, run these to see function outputs:
+	
+Note: files_array indexes:
+0 - `1D-exp-samp.txt` 
+1 - `1D-exp-uni.txt`
+2 - `1D-no-noise-lin.txt`
+3 - `1D-quad-uni-noise.txt`
+4 - `1D-quad-uni.txt`
+5 - `2D-noisy-lin.txt`
+'''
+
+
+'''
+Test this function for indexes 2, and 5, for question 1a
+
+Params:
+	- index - The index of the data file from the files_array
+
+Outputs: Closed form theta, and closed form loss. Plot of closed form.
+'''
 
 def test_loss_linreg(index):
 	data_X, data_Y = load_data(files_array[index])
+	data_X = numpy.hstack([numpy.ones((data_X.shape[0], 1)), data_X])
 
 	theoretical_theta, theoretical_loss, _, _ = numpy.linalg.lstsq(data_X, data_Y, rcond=1)
 	theoretical_loss = theoretical_loss / (2 * data_Y.shape[0])
 
-	data_X = numpy.hstack([numpy.ones((data_X.shape[0], 1)), data_X])
 	Theta = linreg_closed_form(data_X, data_Y)
-	#thet = Theta[0]
 	Theta = numpy.asarray([numpy.delete(Theta, [0])])
-	print("Theta", Theta)
 	Loss = loss(Theta.T, data_X, data_Y)
 
-	print("Test: ", theoretical_theta, theoretical_loss)
-	print("Actual:", Theta, Loss)
+	print("Closed Form Theta:", Theta)
+	#print("Theoretical Theta: ", theoretical_theta)
+
+	print("Closed Form Loss:", Loss)
+	#print("Theoretical Loss:", theoretical_loss)
 
 	if index != 5:
-		#vis_linreg_model(data_X, data_Y, numpy.array(numpy.vstack([0.0, Theta])))
 		data_X = numpy.delete(data_X, 0, 1)
 		vis_linreg_model(data_X, data_Y, Theta[0])
 	else:
-		#vis_linreg_model(data_X, data_Y, numpy.array(numpy.vstack([0.0, Theta[0][0], Theta[0][1]])))
 		data_X = numpy.delete(data_X, 0, 1)
 		vis_linreg_model(data_X, data_Y, Theta[0])
 
@@ -390,4 +371,4 @@ if __name__ == '__main__':
 	#test_loss_function(0)
 	#test_gradient_descent(2)
 	#test_rff(1)
-	test_loss_linreg(5)
+	test_loss_linreg(2)
