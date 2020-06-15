@@ -145,13 +145,15 @@ def loss(Theta, train_X, train_Y):
 	for i in range(n):
 
 		# This line is questionable...
-		#print("Train X")
-		#print(train_X)
-		#print("Theta")
-		#print(Theta)
-		#print("Train Y")
-		#print(train_Y)
+
 		val = (train_X[i].dot(Theta) - train_Y[i])
+		"""
+		print("Train X")
+		print(train_X)
+		print("Theta")
+		print(Theta)
+		print("Train Y")
+		print(train_Y)"""
 
 		val_transpose = numpy.transpose(val)
 		total = val_transpose.dot(val)
@@ -285,6 +287,26 @@ def vis_rff_model(train_X, train_Y, Theta, Omega, B):
 
 # Tests
 
+def test_loss_linreg(index):
+	data_X, data_Y = load_data(files_array[index])
+
+	theoretical_theta, theoretical_loss, _, _ = numpy.linalg.lstsq(data_X, data_Y, rcond=1)
+	theoretical_loss = theoretical_loss / (2 * data_Y.shape[0])
+
+	Theta = linreg_closed_form(data_X, data_Y)
+	Theta = numpy.asarray([numpy.delete(Theta, [0])])
+	print("Theta", Theta)
+	Loss = loss(Theta.T, data_X, data_Y)
+
+	print("Test: ", theoretical_theta, theoretical_loss)
+	print("Actual:", Theta, Loss)
+
+	if index != 5:
+		vis_linreg_model(data_X, data_Y, numpy.array(numpy.vstack([0.0, Theta])))
+	else:
+		vis_linreg_model(data_X, data_Y, numpy.array(numpy.vstack([0.0, Theta[0][0], Theta[0][1]])))
+
+
 def test_linreg(index):
 	data_X, data_Y = load_data(files_array[index])
 	Theta = linreg_closed_form(data_X, data_Y)
@@ -350,6 +372,8 @@ def test_rff(index):
 if __name__ == '__main__':
 	#data_X, data_Y = load_data(files_array[2])
 	#test_all_linreg()
+	#test_linreg(2)
 	#test_loss_function(0)
 	#test_gradient_descent(0)
-	test_rff(1)
+	#test_rff(1)
+	test_loss_linreg(2)
