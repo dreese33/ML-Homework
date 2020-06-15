@@ -124,7 +124,7 @@ def linreg_closed_form(train_X, train_Y):
 	x_transpose_dot = numpy.dot(x_transpose, train_X)
 	inverse_val = numpy.linalg.inv(x_transpose_dot)
 	Theta = numpy.dot(numpy.dot(inverse_val, x_transpose), train_Y)
-	ret_val = numpy.array(numpy.vstack([1.0, Theta]))
+	ret_val = numpy.array(numpy.vstack([0.0, Theta]))
 	return ret_val
 
 ###################
@@ -318,9 +318,9 @@ def test_loss_function(index):
 def test_gradient_descent(index):
 	data_X, data_Y = load_data(files_array[index])
 
-	initial_theta = [[1.], [0.]]
+	initial_theta = [[0.], [0.]]
 	if index == 5:
-		initial_theta = [[1.], [0.], [0.]]
+		initial_theta = [[0.], [0.], [0.]]
 
 	theta = linreg_grad_desc(initial_theta, data_X, data_Y)
 	theta = (theta[len(theta) - 1])[0]
@@ -349,7 +349,7 @@ def test_rff(index):
 
 if __name__ == '__main__':
 	#data_X, data_Y = load_data(files_array[2])
-	test_all_linreg()
+	#test_all_linreg()
 	#test_loss_function(0)
-	#test_gradient_descent(5)
-	#test_rff(5)
+	#test_gradient_descent(0)
+	test_rff(1)
