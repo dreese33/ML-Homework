@@ -164,6 +164,7 @@ def loss(Theta, train_X, train_Y):
 	rv /= 2 * n
 	return rv
 
+
 ###################
 # YOUR CODE BELOW #
 ###################
@@ -180,20 +181,27 @@ def linreg_grad_desc(initial_Theta, train_X, train_Y, alpha=0.05, num_iters=500,
 		The history of theta's and their associated loss as a list of tuples [ (Theta1,loss1), (Theta2,loss2), ...]
 	'''
 
-	train_X = numpy.hstack([numpy.zeros((train_X.shape[0], 1)), train_X])
+	train_X = numpy.hstack([numpy.ones((train_X.shape[0], 1)), train_X])
+	#train_X = numpy.hstack([numpy.zeros((train_X.shape[0], 1)), train_X])
 	cur_Theta = initial_Theta
 	step_history = list()
+
+	x_transpose = numpy.transpose(train_X)
+	term1 = x_transpose.dot(train_X)
+	term2 = x_transpose.dot(train_Y)
+	#print(train_X)
+	#print("Term1", term1)
+	#print("Term2", term2)
+
 	for k in range(1, num_iters + 1):
 		cur_loss = loss(cur_Theta, train_X, train_Y)
 		step_history.append((cur_Theta, cur_loss))
 		if print_iters:
 			print("Iteration: {} , Loss: {} , Theta: {}".format(k, cur_loss, cur_Theta))
 
-		x_transpose = numpy.transpose(train_X)
-		term1 = x_transpose.dot(train_X)
-		term2 = x_transpose.dot(train_Y)
 		term1_final = term1.dot(cur_Theta)
 		cur_Theta = cur_Theta - alpha * (1 / (train_Y.shape[0])) * (term1_final - term2)
+		#print("Theta", cur_Theta)
 
 	return numpy.asarray(step_history)
 
@@ -293,7 +301,9 @@ def test_loss_linreg(index):
 	theoretical_theta, theoretical_loss, _, _ = numpy.linalg.lstsq(data_X, data_Y, rcond=1)
 	theoretical_loss = theoretical_loss / (2 * data_Y.shape[0])
 
+	data_X = numpy.hstack([numpy.ones((data_X.shape[0], 1)), data_X])
 	Theta = linreg_closed_form(data_X, data_Y)
+	#thet = Theta[0]
 	Theta = numpy.asarray([numpy.delete(Theta, [0])])
 	print("Theta", Theta)
 	Loss = loss(Theta.T, data_X, data_Y)
@@ -302,9 +312,13 @@ def test_loss_linreg(index):
 	print("Actual:", Theta, Loss)
 
 	if index != 5:
-		vis_linreg_model(data_X, data_Y, numpy.array(numpy.vstack([0.0, Theta])))
+		#vis_linreg_model(data_X, data_Y, numpy.array(numpy.vstack([0.0, Theta])))
+		data_X = numpy.delete(data_X, 0, 1)
+		vis_linreg_model(data_X, data_Y, Theta[0])
 	else:
-		vis_linreg_model(data_X, data_Y, numpy.array(numpy.vstack([0.0, Theta[0][0], Theta[0][1]])))
+		#vis_linreg_model(data_X, data_Y, numpy.array(numpy.vstack([0.0, Theta[0][0], Theta[0][1]])))
+		data_X = numpy.delete(data_X, 0, 1)
+		vis_linreg_model(data_X, data_Y, Theta[0])
 
 
 def test_linreg(index):
@@ -374,6 +388,6 @@ if __name__ == '__main__':
 	#test_all_linreg()
 	#test_linreg(2)
 	#test_loss_function(0)
-	#test_gradient_descent(0)
+	#test_gradient_descent(2)
 	#test_rff(1)
-	test_loss_linreg(2)
+	test_loss_linreg(5)
