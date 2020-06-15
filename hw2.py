@@ -114,13 +114,9 @@ def vis_linreg_model(train_X, train_Y, Theta):
 def linreg_closed_form(train_X, train_Y):
 	'''
 	Computes the optimal parameters for the given training data in closed form
-
-
 	Args:
 		train_X (N-by-D numpy array): Training data features as a matrix of row vectors (train_X[i][j] is the jth component of the ith example)
 		train_Y (length N numpy array): The training data target as a length N vector
-
-
 	Returns:
 		A length D+1 numpy array with the optimal parameters
 	'''
@@ -128,7 +124,7 @@ def linreg_closed_form(train_X, train_Y):
 	x_transpose_dot = numpy.dot(x_transpose, train_X)
 	inverse_val = numpy.linalg.inv(x_transpose_dot)
 	Theta = numpy.dot(numpy.dot(inverse_val, x_transpose), train_Y)
-	ret_val = numpy.array(numpy.vstack([0.0, Theta]))
+	ret_val = numpy.array(numpy.vstack([1.0, Theta]))
 	return ret_val
 
 ###################
@@ -137,18 +133,13 @@ def linreg_closed_form(train_X, train_Y):
 def loss(Theta, train_X, train_Y):
 	'''
 	Computes the squared loss for the given setting of the parameters given the training data
-
-
 	Args:
 		Theta (length D+1 numpy array): the parameters of the model
 		train_X (N-by-D numpy array): Training data features as a matrix of row vectors (train_X[i][j] is the jth component of the ith example)
 		train_Y (length N numpy array): The training data target as a length N vector
-
-
 	Returns:
 		The (scalar) loss for the given parameters and data.
 	'''
-	train_X = numpy.hstack([numpy.zeros((train_X.shape[0], 1)), train_X])
 	rv = None
 	n = train_X.shape[0]
 	for i in range(n):
@@ -177,16 +168,12 @@ def loss(Theta, train_X, train_Y):
 def linreg_grad_desc(initial_Theta, train_X, train_Y, alpha=0.05, num_iters=500, print_iters=True):
 	'''
 	Fits parameters using gradient descent
-
-
 	Args:
 		initial_Theta ((D+1)-by-1 numpy array): The initial value for the parameters we're optimizing over
 		train_X (N-by-D numpy array): Training data features as a matrix of row vectors (train_X[i][j] is the jth component of the ith example)
 		train_Y (N-by-1 numpy array): The training data target as a vector
 		alpha (float): the learning rate/step size, defaults to 0.1
 		num_iters (int): number of iterations to run gradient descent for, defaults to 500
-
-
 	Returns:
 		The history of theta's and their associated loss as a list of tuples [ (Theta1,loss1), (Theta2,loss2), ...]
 	'''
@@ -212,20 +199,14 @@ def linreg_grad_desc(initial_Theta, train_X, train_Y, alpha=0.05, num_iters=500,
 def apply_RFF_transform(X, Omega, B):
 	'''
 	Transforms features into a Fourier basis with given samples
-
 		Given a set of random inner products and translations, transform X into the Fourier basis, Phi(X)
 			phi_k(x) = cos(<x,omega_k> + b_k)                           #scalar form
 			Phi(x) = sqrt(1/D)*[phi_1(x), phi_2(x), ..., phi_NFF(x)].T  #vector form
 			Phi(X) = [Phi(x_1), Phi(x_2), ..., Phi(x_N)].T              #matrix form
-
-
 	Args:
 		X (N-by-D numpy array): matrix of row-vector features (may also be a single row-vector)
 		Omega (D-by-NFF numpy array): matrix of row-vector inner products
 		B (NFF length numpy array): vector of translations
-
-
-
 	Returns:
 		A N-by-NFF numpy array matrix of transformed points, Phi(X)
 	'''
@@ -237,21 +218,14 @@ def apply_RFF_transform(X, Omega, B):
 def random_fourier_features(train_X, train_Y, num_fourier_features=100, alpha=0.1, num_iters=500, print_iters=False):
 	'''
 	Creates a random set of Fourier basis functions and fits a linear model in this space.
-
 		Randomly sample num_fourier_features's non-linear transformations of the form:
-
 			phi_k(x) = cos(<x,omega_k> + b_k)
 			Phi(x) = sqrt(1/D)*[phi_1(x), phi_2(x), ..., phi_NFF(x)]
-
-		where omega_k and b_k are sampled according to (Rahimi and Recht, 20018). 
-
-
+		where omega_k and b_k are sampled according to (Rahimi and Recht, 20018).
 	Args:
 		train_X (N-by-D numpy array): Training data features as a matrix of row vectors (train_X[i][j] is the jth component of the ith example)
 		train_Y (length N numpy array): The training data target as a length N vector
 		num_fourier_features (int): the number of random features to generate
-
-
 	Returns:
 		Theta (numpy array of length num_fourier_features+1): the weights for the *transformed* model
 		Omega (D-by-num_fourier_features numpy array): the inner product term of the transformation
@@ -311,42 +285,6 @@ def vis_rff_model(train_X, train_Y, Theta, Omega, B):
 
 # Tests
 
-def class_test():
-	# import data for two dimension examples, choose one for each test
-	#data_X, data_Y = load_data('1D-no-noise-lin.txt')
-	data_X, data_Y = load_data('2D-noisy-lin.txt')
-	print(data_X)
-
-
-	Theta = linreg_closed_form(data_X, data_Y)
-
-	# test by the python library function
-	theoretical_theta, theoretical_loss, _, _ = numpy.linalg.lstsq(data_X, data_Y, rcond=1)
-	theoretical_loss = theoretical_loss / (2 * data_Y.shape[0])
-	print("Theoretical", theoretical_theta)
-
-	Theta = linreg_closed_form(data_X, data_Y)
-	Loss = loss(Theta, data_X, data_Y)
-
-	print('\nClosed form theta: ', Theta.T)
-	print('Loss:', Loss)
-	vis_linreg_model(data_X, data_Y, Theta)
-
-
-def test_loss_linreg(index):
-	data_X, data_Y = load_data(files_array[index])
-
-	theoretical_theta, theoretical_loss, _, _ = numpy.linalg.lstsq(data_X, data_Y, rcond=1)
-	theoretical_loss = theoretical_loss / (2 * data_Y.shape[0])
-
-	Theta = linreg_closed_form(data_X, data_Y)
-	Loss = loss(Theta, data_X, data_Y)
-
-	print("Test: ", theoretical_theta, theoretical_loss)
-	print("Actual:", Theta, Loss)
-
-	vis_linreg_model(data_X, data_Y, Theta)
-
 def test_linreg(index):
 	data_X, data_Y = load_data(files_array[index])
 	Theta = linreg_closed_form(data_X, data_Y)
@@ -371,9 +309,9 @@ def test_all_loss():
 
 def test_loss_function(index):
 	data_X, data_Y = load_data(files_array[index])
-
 	theta_closed = linreg_closed_form(data_X, data_Y)
-	print(loss(theta_closed, data_X, data_Y))
+	data_X1 = numpy.hstack([numpy.zeros((data_X.shape[0], 1)), data_X])
+	print(loss(theta_closed, data_X1, data_Y))
 	print(numpy.linalg.lstsq(data_X, data_Y, rcond=-1))
 
 
@@ -410,15 +348,8 @@ def test_rff(index):
 
 
 if __name__ == '__main__':
-	#data_X, data_Y = load_data(files_array[5])
-	#plot_helper(data_X, data_Y)
-	#test_all_linreg()
-	#test_linreg(5)
+	#data_X, data_Y = load_data(files_array[2])
+	test_all_linreg()
 	#test_loss_function(0)
 	#test_gradient_descent(5)
-	#test_rff(3)
-	#test_loss_linreg(5)
-	class_test()
-
-
-
+	#test_rff(5)
