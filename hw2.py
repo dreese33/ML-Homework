@@ -257,14 +257,6 @@ def vis_rff_model(train_X, train_Y, Theta, Omega, B):
 
 '''
 	Tests section, run these to see function outputs:
-	
-Note: files_array indexes:
-0 - `1D-exp-samp.txt` 
-1 - `1D-exp-uni.txt`
-2 - `1D-no-noise-lin.txt`
-3 - `1D-quad-uni-noise.txt`
-4 - `1D-quad-uni.txt`
-5 - `2D-noisy-lin.txt`
 '''
 
 
@@ -401,11 +393,21 @@ def test_loss_function(index):
 	print(numpy.linalg.lstsq(data_X, data_Y, rcond=-1))
 
 
-def test_rff(index):
+def test_rff(index, num_fourier_features=100):
 	data_X, data_Y = load_data(files_array[index])
-	Theta, Omega, B = random_fourier_features(data_X, data_Y)
+	Theta, Omega, B = random_fourier_features(data_X, data_Y, num_fourier_features=num_fourier_features)
 	vis_rff_model(data_X, data_Y, Theta, Omega, B)
 
+
+'''
+Note: files_array indexes:
+0 - `1D-exp-samp.txt` 
+1 - `1D-exp-uni.txt`
+2 - `1D-no-noise-lin.txt`
+3 - `1D-quad-uni-noise.txt`
+4 - `1D-quad-uni.txt`
+5 - `2D-noisy-lin.txt`
+'''
 
 # Main function
 if __name__ == '__main__':
@@ -413,6 +415,6 @@ if __name__ == '__main__':
 	#test_all_linreg()
 	#test_linreg(2)
 	#test_loss_function(0)
-	test_gradient_descent(5, alpha=0.1, num_iters=20)
-	#test_rff(1)
+	#test_gradient_descent(5, num_iters=50000, print_iters=False)
+	test_rff(4, num_fourier_features=25)
 	#test_loss_linreg(0)
