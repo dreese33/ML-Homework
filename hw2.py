@@ -273,13 +273,24 @@ Test this function for indexes 2, and 5, for question 1a
 
 Params:
 	- index - The index of the data file from the files_array
+	- duplicate_column - Copies and adds a column to demonstrate for 1b
+	- duplicate_row - Copies and adds a row to demonstrate for 1c
 
 Outputs: Closed form theta, and closed form loss. Plot of closed form.
 '''
 
-def test_loss_linreg(index):
+def test_loss_linreg(index, duplicate_column=False, duplicate_row=False):
 	data_X, data_Y = load_data(files_array[index])
 	data_X = numpy.hstack([numpy.ones((data_X.shape[0], 1)), data_X])
+	if duplicate_column:
+		data_X = numpy.hstack([numpy.ones((data_X.shape[0], 1)), data_X])
+
+
+	if duplicate_row:
+		print(data_X.shape)
+		data_X = numpy.vstack([data_X[2], data_X])
+		data_Y = numpy.vstack([data_Y[2], data_Y])
+		print("After", data_X.shape)
 
 	theoretical_theta, theoretical_loss, _, _ = numpy.linalg.lstsq(data_X, data_Y, rcond=1)
 	theoretical_loss = theoretical_loss / (2 * data_Y.shape[0])
@@ -300,6 +311,64 @@ def test_loss_linreg(index):
 	else:
 		data_X = numpy.delete(data_X, 0, 1)
 		vis_linreg_model(data_X, data_Y, Theta[0])
+
+
+'''
+Tester function for part 2 of the homework
+
+Params:
+	- index - The index of the data file from the files_array
+	- alpha, num_iters, print_iters - for linreg_grad_desc function
+	- duplicate_column - Copies and adds a column to demonstrate for 1d
+	- duplicate_row - Copies and adds a row to demonstrate for 1d
+
+Outputs: Gradient descent theta, gradient descent loss, closed form theta, 
+		closed form loss, plot of data for gradient descent.
+'''
+
+def test_gradient_descent(index, alpha=0.05, num_iters=500, print_iters=True, duplicate_column=False, duplicate_row=False):
+	data_X, data_Y = load_data(files_array[index])
+	initial_theta = [[0.], [0.]]
+	if index == 5:
+		initial_theta = [[0.], [0.], [0.]]
+
+	if duplicate_column:
+		data_X = numpy.hstack([numpy.ones((data_X.shape[0], 1)), data_X])
+		initial_theta.append([0.])
+
+
+	if duplicate_row:
+		data_X = numpy.vstack([data_X[2], data_X])
+		data_Y = numpy.vstack([data_Y[2], data_Y])
+
+	theta = linreg_grad_desc(initial_theta, data_X, data_Y, alpha=alpha, num_iters=num_iters, print_iters=print_iters)
+	loss1 = (theta[len(theta) - 1])[1]
+	theta = (theta[len(theta) - 1])[0]
+
+	print()
+	print("grad_desc_theta: " + str(theta))
+	print("grad_desc_loss: " + str(loss1))
+
+	if duplicate_column:
+		data_X = numpy.delete(data_X, 0, 1)
+		if index == 5:
+			theta = numpy.vstack([theta[1], theta[2], theta[3]])
+		else:
+			theta = numpy.vstack([theta[1], theta[2]])
+
+	if index == 5:
+		vis_linreg_model(data_X, data_Y, theta)
+	else:
+		vis_linreg_model(data_X, data_Y, theta)
+
+	data_X = numpy.hstack([numpy.ones((data_X.shape[0], 1)), data_X])
+	theta_closed = linreg_closed_form(data_X, data_Y)
+	theta_closed = numpy.asarray([numpy.delete(theta_closed, [0])])
+	loss2 = loss(theta_closed.T, data_X, data_Y)
+
+	print()
+	print("theoretical_theta: " + str(theta_closed))
+	print("theoretical_loss: " + str(loss2))
 
 
 def test_linreg(index):
@@ -332,43 +401,18 @@ def test_loss_function(index):
 	print(numpy.linalg.lstsq(data_X, data_Y, rcond=-1))
 
 
-def test_gradient_descent(index):
-	data_X, data_Y = load_data(files_array[index])
-
-	initial_theta = [[0.], [0.]]
-	if index == 5:
-		initial_theta = [[0.], [0.], [0.]]
-
-	theta = linreg_grad_desc(initial_theta, data_X, data_Y)
-	theta = (theta[len(theta) - 1])[0]
-	print("New Theta: " + str(theta))
-
-	if index == 5:
-		vis_linreg_model(data_X, data_Y, theta)
-	else:
-		vis_linreg_model(data_X, data_Y, theta)
-
-	theta_closed = linreg_closed_form(data_X, data_Y)
-
-	print("Closed Theta: " + str(theta_closed))
-	vis_linreg_model(data_X, data_Y, theta_closed)
-
-	data_X1 = numpy.hstack([numpy.zeros((data_X.shape[0], 1)), data_X])
-	print(loss(theta_closed, data_X1, data_Y))
-	print(numpy.linalg.lstsq(data_X, data_Y, rcond=-1))
-
-
 def test_rff(index):
 	data_X, data_Y = load_data(files_array[index])
 	Theta, Omega, B = random_fourier_features(data_X, data_Y)
 	vis_rff_model(data_X, data_Y, Theta, Omega, B)
 
 
+# Main function
 if __name__ == '__main__':
 	#data_X, data_Y = load_data(files_array[2])
 	#test_all_linreg()
 	#test_linreg(2)
 	#test_loss_function(0)
-	#test_gradient_descent(2)
+	test_gradient_descent(5, alpha=0.1, num_iters=20)
 	#test_rff(1)
-	test_loss_linreg(2)
+	#test_loss_linreg(0)
