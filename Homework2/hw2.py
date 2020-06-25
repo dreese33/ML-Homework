@@ -363,36 +363,6 @@ def test_gradient_descent(index, alpha=0.05, num_iters=500, print_iters=True, du
 	print("theoretical_loss: " + str(loss2))
 
 
-def test_linreg(index):
-	data_X, data_Y = load_data(files_array[index])
-	Theta = linreg_closed_form(data_X, data_Y)
-	vis_linreg_model(data_X, data_Y, Theta)
-
-
-def test_all_linreg():
-	for index in range(5):
-		data_X, data_Y = load_data(files_array[index])
-		Theta = linreg_closed_form(data_X, data_Y)
-		vis_linreg_model(data_X, data_Y, Theta)
-
-
-def test_all_loss():
-	for index in range(5):
-		data_X, data_Y = load_data(files_array[index])
-		theta_closed = linreg_closed_form(data_X, data_Y)
-		data_X1 = numpy.hstack([numpy.zeros((data_X.shape[0], 1)), data_X])
-		print(loss(theta_closed, data_X1, data_Y))
-		print(numpy.linalg.lstsq(data_X, data_Y, rcond=-1))
-
-
-def test_loss_function(index):
-	data_X, data_Y = load_data(files_array[index])
-	theta_closed = linreg_closed_form(data_X, data_Y)
-	data_X1 = numpy.hstack([numpy.zeros((data_X.shape[0], 1)), data_X])
-	print(loss(theta_closed, data_X1, data_Y))
-	print(numpy.linalg.lstsq(data_X, data_Y, rcond=-1))
-
-
 def test_rff(index, num_fourier_features=100):
 	data_X, data_Y = load_data(files_array[index])
 	Theta, Omega, B = random_fourier_features(data_X, data_Y, num_fourier_features=num_fourier_features)
@@ -412,9 +382,7 @@ Note: files_array indexes:
 # Main function
 if __name__ == '__main__':
 	#data_X, data_Y = load_data(files_array[2])
-	#test_all_linreg()
-	#test_linreg(2)
-	#test_loss_function(0)
-	#test_gradient_descent(5, num_iters=50000, print_iters=False)
-	test_rff(4, num_fourier_features=25)
-	#test_loss_linreg(0)
+	index = 2
+	#test_gradient_descent(index, alpha=0.01, num_iters=100000, print_iters=False)
+	#test_rff(4, num_fourier_features=800)
+	#test_loss_linreg(index)
