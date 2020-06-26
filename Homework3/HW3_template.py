@@ -108,6 +108,7 @@ def pairwise_dist(x, y):
 
 
 # TEST CASE
+
 x = np.random.randn(2, 2)
 y = np.random.randn(3, 2)
 
@@ -131,6 +132,7 @@ print("==y==")
 print(y)
 print("==dist==")
 print(pairwise_dist(x, y))
+print("\n\n")
 
 
 # ### 1.2 KMeans Implementation [25pts]
@@ -319,6 +321,7 @@ def cluster_pixels_kmeans(image, K):
 
 
 # helper function for plotting images. You don't have to modify it
+"""
 print("Beginning K means")
 print(certifi.where())
 image = imageio.imread(imageio.core.urlopen(url).read())
@@ -328,7 +331,7 @@ plot_images([image, kmeans_image_5], ['origin', 'kmeans=5'])
 
 kmeans_image_15 = cluster_pixels_kmeans(image, 15)
 plot_images([image, kmeans_image_15], ['origin', 'kmeans=15'])
-
+"""
 
 # ### 1.4 Find the optimal number of clusters [5pts]
 # 
@@ -361,7 +364,7 @@ def find_optimal_num_clusters(image, max_K=10):
     plt.show()
     raise NotImplementedError
 
-find_optimal_num_clusters(image)
+#find_optimal_num_clusters(image)
 
 
 # ## 2. GMM implementation [35 pts]
@@ -411,7 +414,9 @@ def softmax(logits):
     Args:
         logits: N x D numpy array
     """
-    raise NotImplementedError
+
+    exp = np.exp(logits - np.transpose(np.asarray([np.max(logits, axis=1)])))
+    return np.transpose((exp / exp.sum(axis=0))[::-1, ::-1])
     
 logits = np.array([[1000, 1000], 
                    [1, 2]], dtype=np.float32)
@@ -438,7 +443,12 @@ def logsumexp(logits):
     Return:
         s: N x 1 array where s[i,0] = logsumexp(logits[i,:])
     """
-    raise NotImplementedError
+
+    max = np.transpose(np.asarray([np.max(logits, axis=1)]))
+    exp = np.exp(logits - max)
+    return np.transpose(np.asarray([np.log(exp.sum(axis=0))])[::-1, ::-1]) + max
+
+    #raise NotImplementedError
 
 
 logits = np.array([[1000, 1000], 
