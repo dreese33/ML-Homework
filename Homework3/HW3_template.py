@@ -101,15 +101,7 @@ def pairwise_dist(x, y):
     """
     #TODO -- 5 pts
 
-    #print("Shapes:", x[:, np.newaxis].shape, y.shape)
-    #print("X", x)
-    #print("Y", y)
-    #return np.sqrt(np.sum(np.square(x[:, np.newaxis] - y), axis=2))
     return np.sqrt(np.sum(np.square(x[:, np.newaxis] - y), axis=2))
-    #exp = np.expand_dims(x)
-    #print(exp.shape)
-    #print("Size", np.size(y), np.size(x[:, np.newaxis]))
-    #return np.sqrt(np.sum(np.square(np.reshape(np.expand_dims(x, y.ndim), y.shape) - y), axis=2))
 
 
 # In[3]:
@@ -362,9 +354,13 @@ def find_optimal_num_clusters(image, max_K=10):
     flat_img = np.reshape(image, [-1, im_channel]).astype(np.float32)
     for i in range(1, max_K+1):
         # TODO: append losses here
-        pass
+        im_height, im_width, im_channel = image.shape
+        flat_img = np.reshape(image, [-1, im_channel]).astype(np.float32)
+        cluster_ids, centers, loss = KMeans()(flat_img, i)
+        losses.append(loss)
         
     plt.plot(x_vals, losses)
+    plt.show()
     raise NotImplementedError
 
 find_optimal_num_clusters(image)
