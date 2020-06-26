@@ -178,10 +178,7 @@ class KMeans(object):
         cluster_idx = np.arange(points.shape[0])
         a = np.arange(points.shape[0])
         for x in np.nditer(a):
-            #print("Pts x:", np.asarray([points[x]]))
-            #print("Pts x shape:", np.asarray([points[x]]).shape)
-            #print("Pairwise dist", pairwise_dist(np.asarray([points[x]]), centers))
-            cluster_idx[x] = np.argmin(pairwise_dist(np.asarray([points[x]]), centers))
+            cluster_idx[x] = np.argmin(pairwise_dist(np.asarray([points[x]]), centers) ** 2)
         print("Iteration complete")
 
         return cluster_idx
@@ -231,7 +228,8 @@ class KMeans(object):
         loss = 0.0
         for k in np.nditer(clusters):
             idx = np.argwhere(cluster_idx == k)
-            loss += np.sum(pairwise_dist(points[idx], centers[k]))
+            loss += np.sum(pairwise_dist(points[idx], centers[k]) ** 2)
+        print("Loss", loss)
 
         return loss
 
