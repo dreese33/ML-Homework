@@ -52,6 +52,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import imageio
 from tqdm import tqdm_notebook as tqdm
+import certifi
+
+
 
 print('Version information')
 
@@ -96,7 +99,17 @@ def pairwise_dist(x, y):
         dist: N x M array, where dist2[i, j] is the euclidean distance between 
         x[i, :] and y[j, :]
     """
-    raise NotImplementedError
+    #TODO -- 5 pts
+
+    #print("Shapes:", x[:, np.newaxis].shape, y.shape)
+    #print("X", x)
+    #print("Y", y)
+    #return np.sqrt(np.sum(np.square(x[:, np.newaxis] - y), axis=2))
+    return np.sqrt(np.sum(np.square(x[:, np.newaxis] - y), axis=2))
+    #exp = np.expand_dims(x)
+    #print(exp.shape)
+    #print("Size", np.size(y), np.size(x[:, np.newaxis]))
+    #return np.sqrt(np.sum(np.square(np.reshape(np.expand_dims(x, y.ndim), y.shape) - y), axis=2))
 
 
 # In[3]:
@@ -169,7 +182,18 @@ class KMeans(object):
         Hint: You could call pairwise_dist() function.
         """
         # TODO [10pts]
-        raise NotImplementedError
+
+        cluster_idx = np.arange(points.shape[0])
+        a = np.arange(points.shape[0])
+        for x in np.nditer(a):
+            #print("Pts x:", np.asarray([points[x]]))
+            #print("Pts x shape:", np.asarray([points[x]]).shape)
+            #print("Pairwise dist", pairwise_dist(np.asarray([points[x]]), centers))
+            cluster_idx[x] = np.argmin(pairwise_dist(np.asarray([points[x]]), centers))
+        print("Iteration complete")
+
+        return cluster_idx
+        #raise NotImplementedError
 
     def _update_centers(self, old_centers, cluster_idx, points):
         """
@@ -187,13 +211,17 @@ class KMeans(object):
         K = old_centers.shape[0]
         for k in range(K):
             # TODO: update centers and new_k here [5pts]
-            pass
+            idx = np.argwhere(cluster_idx == k)
+            if len(idx) > 0:
+                new_k += 1
+                centers[k] = np.mean(points[idx])
+                print("new center " + str(k), centers[k])
         if new_k < K:
             print("Warning, reducing K from %d to %d\n" % (K, new_k))
             K = new_k
             centers = centers[:K]
         return centers
-        raise NotImplementedError
+        #raise NotImplementedError
 
     def _get_loss(self, centers, cluster_idx, points):
         """
@@ -207,7 +235,15 @@ class KMeans(object):
             Use pairwise_dist().
         """
         # TODO [10pts]
-        raise NotImplementedError
+        clusters = np.arange(centers.shape[0])
+        loss = 0.0
+        for k in np.nditer(clusters):
+            idx = np.argwhere(cluster_idx == k)
+            loss += np.sum(pairwise_dist(points[idx], centers[k]))
+
+        return loss
+
+        #raise NotImplementedError
         
     def __call__(self, points, K, max_iters=100, abs_tol=1e-16, rel_tol=1e-16, verbose=False, **kwargs):
         """
@@ -252,12 +288,17 @@ class KMeans(object):
 # helper function for plotting images. You don't have to modify it
 
 def plot_images(img_list, title_list, figsize=(11, 6)):
+    print("Plotting")
     assert len(img_list) == len(title_list)
+    print("Plotting")
     fig, axes = plt.subplots(1, len(title_list), figsize=figsize)
+    print("Plotting")
     for i, ax in enumerate(axes):
         ax.imshow(img_list[i] / 255.0)
         ax.set_title(title_list[i])
         ax.axis('off')
+        print("In loop plotting")
+    plt.show()
 
 
 # In[6]:
@@ -283,9 +324,13 @@ def cluster_pixels_kmeans(image, K):
 
 # In[7]:
 
+#Additional tests
+
+
 
 # helper function for plotting images. You don't have to modify it
-
+print("Beginning K means")
+print(certifi.where())
 image = imageio.imread(imageio.core.urlopen(url).read())
 
 kmeans_image_5 = cluster_pixels_kmeans(image, 5)
