@@ -505,7 +505,8 @@ class GMM(object):
               This allows you to write treat it as a product of univariate gaussians.
         """
         # TODO [10pts]
-        raise NotImplementedError
+        print("ll_joint called")
+        #raise NotImplementedError
 
     def _E_step(self, points, pi, mu, sigma, **kwargs):
         """
@@ -519,11 +520,12 @@ class GMM(object):
             
         Hint: You should be able to do this with just a few lines of code by using softmax() defined above. 
         """
+        print("E step called")
         ll_joint = self._ll_joint(points, pi, mu, sigma)
         # TODO [5pts]
         gamma = None
         return gamma
-        raise NotImplementedError
+        #raise NotImplementedError
 
     def _M_step(self, points, gamma, **kwargs):
         """
@@ -537,6 +539,7 @@ class GMM(object):
         Note:
             We provided the example for how to update mu.
         """
+        print("M step called")
         K = gamma.shape[1]
         D = points.shape[1]
         mu = np.zeros((K, D))
@@ -550,9 +553,12 @@ class GMM(object):
             mu[k, :] = w_mu
     
             # TODO: update sigme [5pts]
+            w_sigma = np.sum(points * (weights - w_mu) * np.transpose(np.asarray([weights - w_mu])))
+            w_sigma = w_sigma / w
+            sigma[k, :] = w_sigma
 
         # TODO: update pi [5pts]
-        pi = None
+        pi = np.sum(gamma) / points.shape[0]
         return pi, mu, sigma
             
         raise NotImplementedError
@@ -573,7 +579,7 @@ class GMM(object):
         Hint: You do not need to change it. For each iteration, we process E and M steps, then 
         """        
         pi, mu, sigma = self._init_components(points, K, **kwargs)
-        pbar = tqdm(range(max_iters))
+        pbar = range(max_iters)#tqdm(range(max_iters))
         for it in pbar:
             # E-step
             gamma = self._E_step(points, pi, mu, sigma)
@@ -623,9 +629,12 @@ def cluster_pixels_gmm(image, K):
 
 
 # helper function for plotting images. You don't have to modify it
+print("Beginning next step")
 image = imageio.imread(imageio.core.urlopen(url).read())
 
+print("Clustering")
 gmm_image_5 = cluster_pixels_gmm(image, 5)
+print("Clustered")
 plot_images([image, gmm_image_5], ['origin', 'gmm=5'])
 
 gmm_image_15 = cluster_pixels_gmm(image, 15)
