@@ -52,7 +52,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import imageio
 from tqdm import tqdm_notebook as tqdm
-import certifi
+#import certifi
 
 
 
