@@ -55,7 +55,6 @@ from tqdm import tqdm_notebook as tqdm
 #import certifi
 
 
-
 print('Version information')
 
 print('python: {}'.format(sys.version))
@@ -323,7 +322,6 @@ def cluster_pixels_kmeans(image, K):
 # helper function for plotting images. You don't have to modify it
 """
 print("Beginning K means")
-print(certifi.where())
 image = imageio.imread(imageio.core.urlopen(url).read())
 
 kmeans_image_5 = cluster_pixels_kmeans(image, 5)
@@ -418,8 +416,7 @@ def softmax(logits):
     exp = np.exp(logits - np.transpose(np.asarray([np.max(logits, axis=1)])))
     return np.transpose((exp / exp.sum(axis=0))[::-1, ::-1])
     
-logits = np.array([[1000, 1000], 
-                   [1, 2]], dtype=np.float32)
+logits = np.array([[1000, 1000],[1, 2]], dtype=np.float32)
 print("""Correct answer:
 ===softmax===
 [[0.5        0.5       ]
@@ -444,9 +441,21 @@ def logsumexp(logits):
         s: N x 1 array where s[i,0] = logsumexp(logits[i,:])
     """
 
-    max = np.transpose(np.asarray([np.max(logits, axis=1)]))
+    #print("Logits val", logits)
+    #print("Logits shape", logits.shape)
+    max = np.max(logits, axis=1)
+    max = np.reshape(max, (max.shape[0], 1))#np.transpose(np.asarray([np.max(logits, axis=1)]))
+    #print("Max val", max)
+    #print("Max val shape", max.shape)
     exp = np.exp(logits - max)
-    return np.transpose(np.asarray([np.log(exp.sum(axis=0))])[::-1, ::-1]) + max
+    #print("Exp val", exp)
+    #print("Exp shape", exp.shape)
+    logval = np.log(exp.sum(axis=1))
+    #print("Logval before reshape", logval)
+    logval = np.reshape(logval, (logval.shape[0], 1))
+    #print("Second val test return", logval)
+    #print("Log val shape", logval.shape)
+    return max + logval #np.transpose(np.asarray([np.log(exp.sum(axis=0))])[::-1, ::-1])# + max
 
     #raise NotImplementedError
 
@@ -505,7 +514,34 @@ class GMM(object):
               This allows you to write treat it as a product of univariate gaussians.
         """
         # TODO [10pts]
-        print("ll_joint called")
+        N = points.shape[0]
+        D = points.shape[1]
+        K = mu.shape[0]
+        print("Appropriate shape values: \n\n")
+        print("N", N)
+        print("D", D)
+        print("K", K)
+        print("\n\n")
+        print("ll_joint began execution \n\n\n\n")
+        ll = np.zeros((points.shape[0], mu.shape[0]))
+        for k in range(K):
+            a = (-1 / (2*(sigma[k] ** 2))) * ((points - mu[k]) ** 2)
+            print("Curr a val", a)
+            print("Log pi", -0.5*np.log(2*np.pi))
+            print("Log sigma", -np.log(sigma[k]))
+            print("a minus pi", a - 0.5*np.log(2*np.pi))
+            print("a minus sigma", a - np.log(sigma[k]))
+            print("a minus both", a - 0.5*np.log(2*np.pi) - np.log(sigma[k]))
+            a = a - 0.5*np.log(2*np.pi) - np.log(sigma[k])
+            print("Later a val", a)
+            ll[:, k] = np.sum(a, axis=1)
+        ll += np.log(np.pi)
+        print("ll_joint:", ll)
+        print("ll_joint shape", ll.shape)
+        print("K:", K)
+        print("N:",N)
+        print("ll_joint finished execution \n\n\n\n")
+        return ll
         #raise NotImplementedError
 
     def _E_step(self, points, pi, mu, sigma, **kwargs):
@@ -520,10 +556,17 @@ class GMM(object):
             
         Hint: You should be able to do this with just a few lines of code by using softmax() defined above. 
         """
-        print("E step called")
+        print("E step began execution \n\n\n\n")
         ll_joint = self._ll_joint(points, pi, mu, sigma)
+        print("lljoint", ll_joint)
+        print("Softmax val:", softmax(np.transpose(ll_joint)))
+        gamma = softmax(np.transpose(ll_joint))#np.transpose(softmax(ll_joint))
         # TODO [5pts]
-        gamma = None
+        #gamma = np.zeros((points.shape[0], mu.shape[0]))
+        #print("Testing join", softmax(ll_joint))
+        print("E step completed", gamma)
+        print("Gamma's Shape", gamma.shape)
+        print("E step finished execution \n\n\n\n")
         return gamma
         #raise NotImplementedError
 
@@ -539,7 +582,7 @@ class GMM(object):
         Note:
             We provided the example for how to update mu.
         """
-        print("M step called")
+        print("M step began execution")
         K = gamma.shape[1]
         D = points.shape[1]
         mu = np.zeros((K, D))
@@ -547,18 +590,42 @@ class GMM(object):
         for k in range(K):
             # update mu
             weights = np.reshape(gamma[:, k], [-1, 1])
+            print("Weights shape", weights.shape)
             w = np.sum(weights)
             w_mu = np.sum(points * weights, axis=0)
             w_mu = w_mu / w
             mu[k, :] = w_mu
+            print("W mu", w_mu)
     
             # TODO: update sigme [5pts]
-            w_sigma = np.sum(points * (weights - w_mu) * np.transpose(np.asarray([weights - w_mu])))
+            subval = points - w_mu
+            print("subval shape 1", subval.shape)
+            print("subval shape 2", np.transpose(subval).shape)
+            print("subval transpose", np.transpose(subval))
+            tp = np.transpose(subval)
+            #print("subval dot", np.inner(subval, tp.T))
+            print("Subval", subval)
+            print("Subval^2", subval*subval)
+            print("Weights", weights)
+            val = weights * subval * subval
+            print("Val", val)
+            print("Test val", np.sum(weights * subval * subval, axis=0))
+            #print("Reshape", np.reshape(subval, (subval.shape[1], subval.shape[0])))
+            #print("Sum sigma 1", np.sum(val, axis=0))
+            #print("Sigma 2", points * (weights - w_mu) * np.transpose(np.asarray([weights - w_mu])))
+            #print("Sigma 3", np.sum(points * (weights - w_mu) * np.transpose(np.asarray([weights - w_mu])), axis=0))
+            #print("Sigma 4", np.sum(points * (weights - w_mu) * np.transpose(np.asarray([weights - w_mu]))))
+            w_sigma = np.sum(val, axis=0)#np.sum(points * (weights - w_mu) * np.transpose(np.asarray([weights - w_mu])))
+            print("Sigma before divide by w", w_sigma)
             w_sigma = w_sigma / w
+            print("W", w)
+            print("W sigma", w_sigma)
             sigma[k, :] = w_sigma
 
         # TODO: update pi [5pts]
-        pi = np.sum(gamma) / points.shape[0]
+        print("Sum gamma", np.sum(gamma, axis=0))
+        pi = np.sum(gamma, axis=0) / points.shape[0]
+        print("Pi", pi)
         return pi, mu, sigma
             
         raise NotImplementedError
@@ -579,7 +646,7 @@ class GMM(object):
         Hint: You do not need to change it. For each iteration, we process E and M steps, then 
         """        
         pi, mu, sigma = self._init_components(points, K, **kwargs)
-        pbar = range(max_iters)#tqdm(range(max_iters))
+        pbar = tqdm(range(max_iters)) #tqdm(range(max_iters))
         for it in pbar:
             # E-step
             gamma = self._E_step(points, pi, mu, sigma)
@@ -630,6 +697,7 @@ def cluster_pixels_gmm(image, K):
 
 # helper function for plotting images. You don't have to modify it
 print("Beginning next step")
+print("\n\n\n\n\n\n\n\n")
 image = imageio.imread(imageio.core.urlopen(url).read())
 
 print("Clustering")
