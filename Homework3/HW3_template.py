@@ -180,8 +180,6 @@ class KMeans(object):
         a = np.arange(points.shape[0])
         for x in np.nditer(a):
             cluster_idx[x] = np.argmin(pairwise_dist(np.asarray([points[x]]), centers) ** 2)
-        print("Iteration complete")
-
         return cluster_idx
         #raise NotImplementedError
 
@@ -441,21 +439,12 @@ def logsumexp(logits):
         s: N x 1 array where s[i,0] = logsumexp(logits[i,:])
     """
 
-    #print("Logits val", logits)
-    #print("Logits shape", logits.shape)
     max = np.max(logits, axis=1)
-    max = np.reshape(max, (max.shape[0], 1))#np.transpose(np.asarray([np.max(logits, axis=1)]))
-    #print("Max val", max)
-    #print("Max val shape", max.shape)
+    max = np.reshape(max, (max.shape[0], 1))
     exp = np.exp(logits - max)
-    #print("Exp val", exp)
-    #print("Exp shape", exp.shape)
     logval = np.log(exp.sum(axis=1))
-    #print("Logval before reshape", logval)
     logval = np.reshape(logval, (logval.shape[0], 1))
-    #print("Second val test return", logval)
-    #print("Log val shape", logval.shape)
-    return max + logval #np.transpose(np.asarray([np.log(exp.sum(axis=0))])[::-1, ::-1])# + max
+    return max + logval
 
     #raise NotImplementedError
 
@@ -653,6 +642,7 @@ def cluster_pixels_gmm(image, K):
 
 
 # helper function for plotting images. You don't have to modify it
+"""
 print("Beginning next step")
 print("\n\n\n\n\n\n\n\n")
 image = imageio.imread(imageio.core.urlopen(url).read())
@@ -664,7 +654,7 @@ plot_images([image, gmm_image_5], ['origin', 'gmm=5'])
 
 gmm_image_15 = cluster_pixels_gmm(image, 15)
 plot_images([image, gmm_image_15], ['origin', 'gmm=15'])
-
+"""
 
 # # 3. Compare KMeans with GMM [15pts]
 # 
@@ -693,6 +683,7 @@ def plot_scatter(samples, ids):
         colors[np.where(ids == maps[i]), :] = choices[i]
     plt.scatter(samples[:, 0], samples[:, 1], s=1, color=colors)
     plt.axis('equal')
+    plt.show()
 
 
 # In[7]:
@@ -716,9 +707,13 @@ def gmm_sampling(num_samples, pi, mu, sigma):
     comp_mu = np.dot(comp_ids, mu)
     comp_sigma = np.dot(comp_ids, sigma)
     #TODO [5pts]
-    samples = None
+    #print("Ids", comp_ids)
+    #print("Mu", comp_mu)
+    #print("Sigma", comp_sigma)
+    samples = comp_sigma * np.asarray([np.random.randn(comp_sigma.shape[0]), np.random.randn(comp_sigma.shape[0])]).T + comp_mu
+    print("Samples", samples)
     return samples, np.argmax(comp_ids, axis=1)
-    raise NotImplementedError
+    #raise NotImplementedError
 
 pi = np.array([0.8, 0.1, 0.1])
 mu = np.array([[0.5, 0.5], 
@@ -738,9 +733,10 @@ plot_scatter(samples, ids)
 
 # 1) Let's see how KMeans does in this case
 # TODO: run it and print the plot
+print("Begin plotting")
 ids, centers,_ = KMeans()(samples, K=3)
 plot_scatter(samples, ids)
-
+print("End plotting")
 
 # In[ ]:
 
