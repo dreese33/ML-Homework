@@ -181,7 +181,7 @@ class KMeans(object):
         for x in np.nditer(a):
             cluster_idx[x] = np.argmin(pairwise_dist(np.asarray([points[x]]), centers) ** 2)
         return cluster_idx
-        #raise NotImplementedError
+
 
     def _update_centers(self, old_centers, cluster_idx, points):
         """
@@ -194,6 +194,7 @@ class KMeans(object):
         Note:
             It is possible to have fewer centers after this step (we provide the reference code).
         """
+        print("Beginning update_centers")
         new_k = 0
         centers = np.copy(old_centers)
         K = old_centers.shape[0]
@@ -202,14 +203,12 @@ class KMeans(object):
             idx = np.argwhere(cluster_idx == k)
             if len(idx) > 0:
                 new_k += 1
-                centers[k] = np.mean(points[idx])
-                print("new center " + str(k), centers[k])
+                centers[k] = np.mean(points[idx][:, 0, :], axis=0)
         if new_k < K:
             print("Warning, reducing K from %d to %d\n" % (K, new_k))
             K = new_k
             centers = centers[:K]
         return centers
-        #raise NotImplementedError
 
     def _get_loss(self, centers, cluster_idx, points):
         """
@@ -232,7 +231,6 @@ class KMeans(object):
 
         return loss
 
-        #raise NotImplementedError
         
     def __call__(self, points, K, max_iters=100, abs_tol=1e-16, rel_tol=1e-16, verbose=False, **kwargs):
         """
@@ -277,16 +275,12 @@ class KMeans(object):
 # helper function for plotting images. You don't have to modify it
 
 def plot_images(img_list, title_list, figsize=(11, 6)):
-    print("Plotting")
     assert len(img_list) == len(title_list)
-    print("Plotting")
     fig, axes = plt.subplots(1, len(title_list), figsize=figsize)
-    print("Plotting")
     for i, ax in enumerate(axes):
         ax.imshow(img_list[i] / 255.0)
         ax.set_title(title_list[i])
         ax.axis('off')
-        print("In loop plotting")
     plt.show()
 
 
@@ -358,7 +352,6 @@ def find_optimal_num_clusters(image, max_K=10):
         
     plt.plot(x_vals, losses)
     plt.show()
-    #raise NotImplementedError
 
 #find_optimal_num_clusters(image)
 
@@ -508,12 +501,16 @@ class GMM(object):
         K = mu.shape[0]
         ll = np.zeros((points.shape[0], mu.shape[0]))
         for k in range(K):
-            a = -(1 / (2*(sigma[k] ** 2))) * ((points - mu[k]) ** 2)
-            a = a - 0.5*np.log(2*np.pi) - np.log(sigma[k])
-            ll[:, k] = np.sum(a, axis=1)
+            eq = (1 / (2 * sigma[k])) * ((points - mu[k]) ** 2)
+            exp = -np.sum(eq, axis=1)
+            normal = exp - 0.5 * mu.shape[1] * np.log(2 * np.pi) - 0.5 * np.sum(np.log(sigma[k]))
+            ll[:, k] = normal
+            #Original code below
+            #a = -(1 / (2*(sigma[k] ** 2))) * ((points - mu[k]) ** 2)
+            #a = a - 0.5*np.log(2*np.pi) - np.log(sigma[k])
+            #ll[:, k] = np.sum(a, axis=1)
         ll += np.log(pi)
         print("ll-joint", ll)
-        print("\n\n\n\n\n\n\n\n")
         return ll
         #raise NotImplementedError
 
@@ -533,7 +530,6 @@ class GMM(object):
         # TODO [5pts]
         gamma = softmax(np.transpose(ll_joint))
         print("Gamma", gamma)
-        print("\n\n\n\n\n\n\n\n")
         return gamma
         #raise NotImplementedError
 
@@ -592,6 +588,7 @@ class GMM(object):
         Hint: You do not need to change it. For each iteration, we process E and M steps, then 
         """        
         pi, mu, sigma = self._init_components(points, K, **kwargs)
+        print("Initial components:", pi, mu, sigma)
         pbar = tqdm(range(max_iters))
         for it in pbar:
             # E-step
