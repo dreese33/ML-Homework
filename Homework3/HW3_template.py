@@ -207,7 +207,7 @@ class KMeans(object):
             print("Warning, reducing K from %d to %d\n" % (K, new_k))
             K = new_k
             centers = centers[:K]
-        print("New centers:", centers)
+        print("Centers updated:", centers)
         return centers
 
     def _get_loss(self, centers, cluster_idx, points):
@@ -312,7 +312,7 @@ def cluster_pixels_kmeans(image, K):
 
 
 # helper function for plotting images. You don't have to modify it
-"""
+
 print("Beginning K means")
 image = imageio.imread(imageio.core.urlopen(url).read())
 
@@ -321,7 +321,7 @@ plot_images([image, kmeans_image_5], ['origin', 'kmeans=5'])
 
 kmeans_image_15 = cluster_pixels_kmeans(image, 15)
 plot_images([image, kmeans_image_15], ['origin', 'kmeans=15'])
-"""
+
 
 # ### 1.4 Find the optimal number of clusters [5pts]
 # 
@@ -353,7 +353,7 @@ def find_optimal_num_clusters(image, max_K=10):
     plt.plot(x_vals, losses)
     plt.show()
 
-#find_optimal_num_clusters(image)
+find_optimal_num_clusters(image)
 
 
 # ## 2. GMM implementation [35 pts]
@@ -502,10 +502,6 @@ class GMM(object):
             exp = -np.sum(eq, axis=1)
             normal = exp - 0.5 * np.log(2 * np.pi) - np.sum(np.log(sigma[k]))
             ll[:, k] = normal
-            #Original code below
-            #a = -(1 / (2*(sigma[k] ** 2))) * ((points - mu[k]) ** 2)
-            #a = a - 0.5*np.log(2*np.pi) - np.log(sigma[k])
-            #ll[:, k] = np.sum(a, axis=1)
         ll += np.log(pi)
         print("ll-joint", ll)
         return ll
@@ -525,7 +521,6 @@ class GMM(object):
         """
         ll_joint = self._ll_joint(points, pi, mu, sigma)
         # TODO [5pts]
-        #gamma = softmax(np.transpose(ll_joint))
         gamma = softmax(ll_joint)
         gamma = np.transpose(gamma[::-1, ::-1])
         print("Gamma", gamma)
@@ -566,7 +561,6 @@ class GMM(object):
         print("Pi", pi)
         print("Mu", mu)
         print("Sigma", sigma)
-        print("\n\n\n\n\n\n\n\n")
         return pi, mu, sigma
             
         #raise NotImplementedError
@@ -587,7 +581,6 @@ class GMM(object):
         Hint: You do not need to change it. For each iteration, we process E and M steps, then 
         """        
         pi, mu, sigma = self._init_components(points, K, **kwargs)
-        print("Initial components:", pi, mu, sigma)
         pbar = tqdm(range(max_iters))
         for it in pbar:
             # E-step
@@ -640,12 +633,10 @@ def cluster_pixels_gmm(image, K):
 # helper function for plotting images. You don't have to modify it
 
 print("Beginning next step")
-print("\n\n\n\n\n\n\n\n")
+print("\n\n")
 image = imageio.imread(imageio.core.urlopen(url).read())
 
-print("Clustering")
 gmm_image_5 = cluster_pixels_gmm(image, 5)
-print("Clustered")
 plot_images([image, gmm_image_5], ['origin', 'gmm=5'])
 
 gmm_image_15 = cluster_pixels_gmm(image, 15)
@@ -703,11 +694,7 @@ def gmm_sampling(num_samples, pi, mu, sigma):
     comp_mu = np.dot(comp_ids, mu)
     comp_sigma = np.dot(comp_ids, sigma)
     #TODO [5pts]
-    #print("Ids", comp_ids)
-    #print("Mu", comp_mu)
-    #print("Sigma", comp_sigma)
     samples = comp_sigma * np.asarray([np.random.randn(comp_sigma.shape[0]), np.random.randn(comp_sigma.shape[0])]).T + comp_mu
-    print("Samples", samples)
     return samples, np.argmax(comp_ids, axis=1)
     #raise NotImplementedError
 
@@ -729,10 +716,8 @@ plot_scatter(samples, ids)
 
 # 1) Let's see how KMeans does in this case
 # TODO: run it and print the plot
-print("Begin plotting")
 ids, centers,_ = KMeans()(samples, K=3)
 plot_scatter(samples, ids)
-print("End plotting")
 
 # In[ ]:
 
