@@ -194,7 +194,6 @@ class KMeans(object):
         Note:
             It is possible to have fewer centers after this step (we provide the reference code).
         """
-        print("Beginning update_centers")
         new_k = 0
         centers = np.copy(old_centers)
         K = old_centers.shape[0]
@@ -208,6 +207,7 @@ class KMeans(object):
             print("Warning, reducing K from %d to %d\n" % (K, new_k))
             K = new_k
             centers = centers[:K]
+        print("New centers:", centers)
         return centers
 
     def _get_loss(self, centers, cluster_idx, points):
@@ -403,7 +403,6 @@ def softmax(logits):
     Args:
         logits: N x D numpy array
     """
-
     exp = np.exp(logits - np.transpose(np.asarray([np.max(logits, axis=1)])))
     return np.transpose((exp / exp.sum(axis=0))[::-1, ::-1])
     
@@ -496,14 +495,12 @@ class GMM(object):
               This allows you to write treat it as a product of univariate gaussians.
         """
         # TODO [10pts]
-        print("pts", points)
-        print("sigma", sigma)
         K = mu.shape[0]
         ll = np.zeros((points.shape[0], mu.shape[0]))
         for k in range(K):
             eq = (1 / (2 * sigma[k])) * ((points - mu[k]) ** 2)
             exp = -np.sum(eq, axis=1)
-            normal = exp - 0.5 * mu.shape[1] * np.log(2 * np.pi) - 0.5 * np.sum(np.log(sigma[k]))
+            normal = exp - 0.5 * np.log(2 * np.pi) - np.sum(np.log(sigma[k]))
             ll[:, k] = normal
             #Original code below
             #a = -(1 / (2*(sigma[k] ** 2))) * ((points - mu[k]) ** 2)
@@ -528,7 +525,9 @@ class GMM(object):
         """
         ll_joint = self._ll_joint(points, pi, mu, sigma)
         # TODO [5pts]
-        gamma = softmax(np.transpose(ll_joint))
+        #gamma = softmax(np.transpose(ll_joint))
+        gamma = softmax(ll_joint)
+        gamma = np.transpose(gamma[::-1, ::-1])
         print("Gamma", gamma)
         return gamma
         #raise NotImplementedError
@@ -639,7 +638,7 @@ def cluster_pixels_gmm(image, K):
 
 
 # helper function for plotting images. You don't have to modify it
-"""
+
 print("Beginning next step")
 print("\n\n\n\n\n\n\n\n")
 image = imageio.imread(imageio.core.urlopen(url).read())
@@ -651,7 +650,7 @@ plot_images([image, gmm_image_5], ['origin', 'gmm=5'])
 
 gmm_image_15 = cluster_pixels_gmm(image, 15)
 plot_images([image, gmm_image_15], ['origin', 'gmm=15'])
-"""
+
 
 # # 3. Compare KMeans with GMM [15pts]
 # 
