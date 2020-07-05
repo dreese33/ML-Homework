@@ -52,7 +52,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import imageio
 from tqdm import tqdm_notebook as tqdm
-#import certifi
 
 
 print('Version information')
@@ -404,7 +403,8 @@ def softmax(logits):
         logits: N x D numpy array
     """
     exp = np.exp(logits - np.transpose(np.asarray([np.max(logits, axis=1)])))
-    return np.transpose((exp / exp.sum(axis=0))[::-1, ::-1])
+    return exp / np.transpose(np.asarray([exp.sum(axis=1)]))
+
     
 logits = np.array([[1000, 1000],[1, 2]], dtype=np.float32)
 print("""Correct answer:
@@ -498,7 +498,7 @@ class GMM(object):
         K = mu.shape[0]
         ll = np.zeros((points.shape[0], mu.shape[0]))
         for k in range(K):
-            eq = (1 / (2 * sigma[k])) * ((points - mu[k]) ** 2)
+            eq = (1 / (2 * (sigma[k] ** 2))) * ((points - mu[k]) ** 2)
             exp = -np.sum(eq, axis=1)
             normal = exp - 0.5 * np.log(2 * np.pi) - np.sum(np.log(sigma[k]))
             ll[:, k] = normal
@@ -522,7 +522,6 @@ class GMM(object):
         ll_joint = self._ll_joint(points, pi, mu, sigma)
         # TODO [5pts]
         gamma = softmax(ll_joint)
-        gamma = np.transpose(gamma[::-1, ::-1])
         print("Gamma", gamma)
         return gamma
         #raise NotImplementedError
@@ -554,7 +553,7 @@ class GMM(object):
             # TODO: update sigme [5pts]
             val = points - w_mu
             sigval = np.sum(weights * val * val, axis=0) / w
-            sigma[k, :] = sigval
+            sigma[k, :] = np.sqrt(sigval)
 
         # TODO: update pi [5pts]
         pi = np.sum(gamma, axis=0) / gamma.shape[0]
@@ -562,7 +561,7 @@ class GMM(object):
         print("Mu", mu)
         print("Sigma", sigma)
         return pi, mu, sigma
-            
+
         #raise NotImplementedError
 
     def __call__(self, points, K, max_iters=100, abs_tol=1e-16, rel_tol=1e-16, **kwargs):
@@ -632,7 +631,7 @@ def cluster_pixels_gmm(image, K):
 
 # helper function for plotting images. You don't have to modify it
 
-print("Beginning next step")
+print("Beginning GMM")
 print("\n\n")
 image = imageio.imread(imageio.core.urlopen(url).read())
 
